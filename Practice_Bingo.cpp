@@ -10,7 +10,7 @@
 
 #define MAX_LOADSTRING 100
 #define MAX_LOADSTRING2 'windowkiki'
-#define MAX 3
+#define MAX 5
 
 
 // 전역 변수:
@@ -235,7 +235,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		int x = -1;
 		int y = -1;
 		int xtrig = 0;
-		int ytrig = 0;
+		//int ytrig = 0;
 		for (int i = 0; i < MAX; i++) {
 			for (int j = 0; j < MAX; j++) {
 				if (g_childhWnd[i][j] == hChild)
@@ -255,7 +255,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		for (int i = 0; i < MAX; i++)
 		{
 			int temp = (int)GetProp(g_childhWnd[i][y], _T("modeBINGO"));
-			if (temp == nCurMode)
+			if (temp == nCurMode || temp == nCurMode+1)
 			{
 				xtrig++;
 			}
@@ -268,29 +268,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				InvalidateRect(hWnd, NULL, TRUE);
 			}
 		}
+		xtrig = 0;
 		//2. 세로체크
 
 		for (int i = 0; i < MAX; i++)
 		{
 			int temp = (int)GetProp(g_childhWnd[x][i], _T("modeBINGO"));
-			if (temp == nCurMode)
-			{
-				ytrig++;
-			}
-		}
-		if (ytrig == MAX)
-		{
-			for (int i = 0; i < MAX; i++)
-			{
-				SetProp(g_childhWnd[x][i], _T("modeBINGO"), (HANDLE)(nCurMode + 1));//빙고
-				InvalidateRect(hWnd, NULL, TRUE);
-			}
-		}
-		//3. 대각선체크
-		for (int i = 0; i < MAX; i++)
-		{
-			int temp = (int)GetProp(g_childhWnd[i][i], _T("modeBINGO"));
-			if (temp == nCurMode)
+			if (temp == nCurMode || temp == nCurMode + 1)
 			{
 				xtrig++;
 			}
@@ -299,11 +283,53 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			for (int i = 0; i < MAX; i++)
 			{
-				SetProp(g_childhWnd[i][y], _T("modeBINGO"), (HANDLE)(nCurMode + 1));//빙고
+				SetProp(g_childhWnd[x][i], _T("modeBINGO"), (HANDLE)(nCurMode + 1));//빙고
 				InvalidateRect(hWnd, NULL, TRUE);
 			}
 		}
-	
+		xtrig = 0;
+		//3. 대각선체크
+		//3.1 왼쪽대각선
+		if (x == y)
+		{
+			for (int i = 0; i < MAX; i++)
+			{
+				int temp = (int)GetProp(g_childhWnd[i][i], _T("modeBINGO"));
+				if (temp == nCurMode || temp == nCurMode + 1)
+				{
+					xtrig++;
+				}
+			}
+			if (xtrig == MAX)
+			{
+				for (int i = 0; i < MAX; i++)
+				{
+					SetProp(g_childhWnd[i][i], _T("modeBINGO"), (HANDLE)(nCurMode + 1));//빙고
+					InvalidateRect(hWnd, NULL, TRUE);
+				}
+			}
+		}
+		xtrig = 0;
+		if (x + y == MAX - 1)
+		{
+			for (int i = 0; i < MAX; i++)
+			{
+				int temp = (int)GetProp(g_childhWnd[i][MAX - i - 1], _T("modeBINGO"));
+				if (temp == nCurMode || temp == nCurMode + 1)
+				{
+					xtrig++;
+				}
+			}
+			if (xtrig == MAX)
+			{
+				for (int i = 0; i < MAX; i++)
+				{
+					SetProp(g_childhWnd[i][MAX - i - 1], _T("modeBINGO"), (HANDLE)(nCurMode + 1));//빙고
+					InvalidateRect(hWnd, NULL, TRUE);
+				}
+			}
+		}
+		xtrig = 0;
 		break;
 	}
 
