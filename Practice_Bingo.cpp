@@ -1,8 +1,8 @@
-// ProjectWindows.cpp : ���ø����̼ǿ� ���� �������� �����մϴ�.
+// ProjectWindows.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 #define ON_MAIN
 #ifdef ON_MAIN
-// ProjectWindows.cpp : ���ø����̼ǿ� ���� �������� �����մϴ�.
+// ProjectWindows.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 
 #include "framework.h"
@@ -13,12 +13,12 @@
 #define MAX 5
 
 
-// ���� ����:
-HINSTANCE hInst;                                // ���� �ν��Ͻ��Դϴ�.
-WCHAR szTitle[MAX_LOADSTRING];                  // ���� ǥ���� �ؽ�Ʈ�Դϴ�.
-WCHAR szWindowClass[MAX_LOADSTRING];            // �⺻ â Ŭ���� �̸��Դϴ�.
+// 전역 변수:
+HINSTANCE hInst;                                // 현재 인스턴스입니다.
+WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
+WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 
-// �� �ڵ� ��⿡ ���Ե� �Լ��� ������ �����մϴ�:
+// 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -39,22 +39,22 @@ enum modeBINGO {
 
 
 int APIENTRY wWinMain(// main
-	_In_ HINSTANCE hInstance, //�������α׷��� �ĺ��ϴ� �� 
-	_In_opt_ HINSTANCE hPrevInstance, // ���� ����� �ν��Ͻ��� �ڵ�
-	_In_ LPWSTR    lpCmdLine, //���������� ��ο� �������� ������ ���� ���ڿ� ������
-	_In_ int       nCmdShow) // �����츦 ȭ�鿡 �����ִ� ����� ����
+	_In_ HINSTANCE hInstance, //응용프로그램을 식별하는 값 
+	_In_opt_ HINSTANCE hPrevInstance, // 먼저 실행된 인스턴스의 핸들
+	_In_ LPWSTR    lpCmdLine, //실행파일의 경로와 명령줄의 내용을 담은 문자열 포인터
+	_In_ int       nCmdShow) // 윈도우를 화면에 보여주는 방법을 명시
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	// TODO: ���⿡ �ڵ带 �Է��մϴ�.
+	// TODO: 여기에 코드를 입력합니다.
 
-	// ���� ���ڿ��� �ʱ�ȭ�մϴ�.
+	// 전역 문자열을 초기화합니다.
 	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadStringW(hInstance, IDC_PROJECTWINDOWS, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
-	// ���ø����̼� �ʱ�ȭ�� �����մϴ�:
+	// 애플리케이션 초기화를 수행합니다:
 	if (!InitInstance(hInstance, nCmdShow))
 	{
 
@@ -64,14 +64,14 @@ int APIENTRY wWinMain(// main
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PROJECTWINDOWS));
 
 	/*
-	C/C++ �� �Լ��� ���� ȣ���Ͽ����� ��ü ���� �帧�� �ڵ忡 �����Ҽ��־���
-	�׷��� ������ ���α׷����� �Է��� �����Ҽ�����(�񵿱�)
-	���� �߻����� �𸣴� �񵿱� �Է¿� ���� ó���� �����ϸ鼭�� ȭ���� ���������ƾ��Ѵ�
-	���� ������ ���α׷��� ���� Message Driven ����� ä��
+	C/C++ 는 함수를 직접 호출하였으며 전체 실행 흐름을 코드에 명시할수있었음
+	그러나 윈도우 프로그래밍은 입력을 예측할수없음(비동기)
+	언제 발생할지 모르는 비동기 입력에 대해 처리가 가능하면서도 화면이 멈추지말아야한다
+	따라서 윈도우 프로그래밍 모델은 Message Driven 방식을 채택
 	*/
 	MSG msg;
 
-	// �⺻ �޽��� �����Դϴ�:
+	// 기본 메시지 루프입니다:
 	while (GetMessage(&msg, nullptr, 0, 0))
 	{
 		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
@@ -87,15 +87,15 @@ int APIENTRY wWinMain(// main
 
 
 //
-//  �Լ�: MyRegisterClass()
+//  함수: MyRegisterClass()
 //
-//  �뵵: â Ŭ������ ����մϴ�.
+//  용도: 창 클래스를 등록합니다.
 //
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
 	WNDCLASSEXW wcex;
 
-	wcex.cbSize = sizeof(WNDCLASSEX); // �ݹ��� �ִ� �Լ��� �ݹ��� ���� �����������
+	wcex.cbSize = sizeof(WNDCLASSEX); // 콜백이 있는 함수는 콜백을 먼저 실행해줘야함
 
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc = WndProc;
@@ -121,22 +121,22 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 }
 
 //
-//   �Լ�: InitInstance(HINSTANCE, int)
+//   함수: InitInstance(HINSTANCE, int)
 //
-//   �뵵: �ν��Ͻ� �ڵ��� �����ϰ� �� â�� ����ϴ�.
+//   용도: 인스턴스 핸들을 저장하고 주 창을 만듭니다.
 //
-//   �ּ�:
+//   주석:
 //
-//        �� �Լ��� ���� �ν��Ͻ� �ڵ��� ���� ������ �����ϰ�
-//        �� ���α׷� â�� ���� ���� ǥ���մϴ�.
+//        이 함수를 통해 인스턴스 핸들을 전역 변수에 저장하고
+//        주 프로그램 창을 만든 다음 표시합니다.
 //
 HWND g_mainhWnd;
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-	hInst = hInstance; // �ν��Ͻ� �ڵ��� ���� ������ �����մϴ�.
+	hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
 	g_mainhWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr); // �����츦 ����
+		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr); // 윈도우를 생성
 
 	if (!g_mainhWnd)
 	{
@@ -150,13 +150,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 }
 
 //
-//  �Լ�: WndProc(HWND, UINT, WPARAM, LPARAM)
+//  함수: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
-//  �뵵: �� â�� �޽����� ó���մϴ�.
+//  용도: 주 창의 메시지를 처리합니다.
 //
-//  WM_COMMAND  - ���ø����̼� �޴��� ó���մϴ�.
-//  WM_PAINT    - �� â�� �׸��ϴ�.
-//  WM_DESTROY  - ���� �޽����� �Խ��ϰ� ��ȯ�մϴ�.
+//  WM_COMMAND  - 애플리케이션 메뉴를 처리합니다.
+//  WM_PAINT    - 주 창을 그립니다.
+//  WM_DESTROY  - 종료 메시지를 게시하고 반환합니다.
 //
 //
 
@@ -176,14 +176,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				g_childhWnd[i][j] = CreateWindow(
 					_T("lpszClass"), //classname
-					NULL, //windowname // ���� Ŭ��������, ��������� ���� �Ѱ��� �ο���
+					NULL, //windowname // 보통 클래스네임, 윈도우네임 둘중 한개만 부여함
 					WS_CHILD | WS_VISIBLE , //window style
 					0 + 100 * i, //x
 					0 + 100 * j, //y
 					100, //width
 					100, //height
-					hWnd, //�θ��ڵ�
-					(HMENU)0, //�޴�
+					hWnd, //부모핸들
+					(HMENU)0, //메뉴
 					hInst, //
 					NULL
 				);
@@ -194,7 +194,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_COMMAND: {
 		int wmId = LOWORD(wParam);
-		// �޴� ������ ���� �м��մϴ�:
+		// 메뉴 선택을 구문 분석합니다:
 		switch (wmId)
 		{
 		case IDM_ABOUT:
@@ -214,12 +214,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
 
-		// TODO: ���⿡ hdc�� ����ϴ� �׸��� �ڵ带 �߰��մϴ�...
+		// TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
 		EndPaint(hWnd, &ps);
 	}
 	break;
-
-	case WM_CHECKBINGO:
+	//////////////////////////////////////////////////////
+	///중복기능이 너무 많음 하나의 함수로 추가할 필요가있음///
+	//////////////////////////////////////////////////////
+	case WM_CHECKBINGO: 
 	{
 		g_bMyTurn = !g_bMyTurn; 
 		if(g_bMyTurn)
@@ -228,7 +230,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			SetWindowText(hWnd, _T("Your Turn"));
 		
 		///////////////////////////////////////////////
-		// �ش� ���ϵ��� ������ ���(x, y)
+		// 해당 차일드의 정보를 얻기(x, y)
 		HWND hChild = (HWND)wParam;
 		int nCurMode = (int)lParam;
 
@@ -249,8 +251,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (x < 0 || y < 0) return 0;
 
 		///////////////////////////////////////////////
-		// ����üũ
-		//1. ����üũ
+		// 빙고체크
+		//1. 가로체크
 		
 		for (int i = 0; i < MAX; i++)
 		{
@@ -264,12 +266,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			for (int i = 0; i < MAX; i++)
 			{
-				SetProp(g_childhWnd[i][y], _T("modeBINGO"), (HANDLE)(nCurMode+1));//����
+				SetProp(g_childhWnd[i][y], _T("modeBINGO"), (HANDLE)(nCurMode+1));//빙고
 				InvalidateRect(hWnd, NULL, TRUE);
 			}
 		}
 		xtrig = 0;
-		//2. ����üũ
+		//2. 세로체크
 
 		for (int i = 0; i < MAX; i++)
 		{
@@ -283,13 +285,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			for (int i = 0; i < MAX; i++)
 			{
-				SetProp(g_childhWnd[x][i], _T("modeBINGO"), (HANDLE)(nCurMode + 1));//����
+				SetProp(g_childhWnd[x][i], _T("modeBINGO"), (HANDLE)(nCurMode + 1));//빙고
 				InvalidateRect(hWnd, NULL, TRUE);
 			}
 		}
 		xtrig = 0;
-		//3. �밢��üũ
-		//3.1 ���ʴ밢��
+		//3. 대각선체크
+		//3.1 왼쪽대각선
 		if (x == y)
 		{
 			for (int i = 0; i < MAX; i++)
@@ -304,7 +306,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				for (int i = 0; i < MAX; i++)
 				{
-					SetProp(g_childhWnd[i][i], _T("modeBINGO"), (HANDLE)(nCurMode + 1));//����
+					SetProp(g_childhWnd[i][i], _T("modeBINGO"), (HANDLE)(nCurMode + 1));//빙고
 					InvalidateRect(hWnd, NULL, TRUE);
 				}
 			}
@@ -324,7 +326,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				for (int i = 0; i < MAX; i++)
 				{
-					SetProp(g_childhWnd[i][MAX - i - 1], _T("modeBINGO"), (HANDLE)(nCurMode + 1));//����
+					SetProp(g_childhWnd[i][MAX - i - 1], _T("modeBINGO"), (HANDLE)(nCurMode + 1));//빙고
 					InvalidateRect(hWnd, NULL, TRUE);
 				}
 			}
@@ -353,14 +355,14 @@ LRESULT CALLBACK ChildProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	{
 	case WM_CREATE:
 	{
-		SetProp(hWnd, _T("modeBINGO"), (HANDLE)bingoNONE); //1. �Ӽ� ����
+		SetProp(hWnd, _T("modeBINGO"), (HANDLE)bingoNONE); //1. 속성 선언
 		break;
 	}
 	case WM_PAINT:
 	{
 		PAINTSTRUCT ps;
 		HDC hdc2 = BeginPaint(hWnd, &ps);
-		// TODO: ���⿡ hdc�� ����ϴ� �׸��� �ڵ带 �߰��մϴ�...	
+		// TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...	
 
 
 		mState = (int)GetProp(hWnd, _T("modeBINGO"));
@@ -429,7 +431,7 @@ LRESULT CALLBACK ChildProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	}
 	return 0;
 }
-// ���� ��ȭ ������ �޽��� ó�����Դϴ�.
+// 정보 대화 상자의 메시지 처리기입니다.
 
 
 #endif  
