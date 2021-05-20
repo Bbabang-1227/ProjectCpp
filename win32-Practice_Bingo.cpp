@@ -12,6 +12,7 @@
 #define MAX_LOADSTRING2 'windowkiki'
 #define MAX 5
 
+#define WM_CHECKBINGO WM_USER + 1
 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
@@ -22,19 +23,17 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-
 LRESULT CALLBACK    ChildProc(HWND, UINT, WPARAM, LPARAM); //child
 
-int CheckandSetBingo(HWND, WPARAM, LPARAM, int);
+INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 HWND hC1;
 HWND g_mainhWnd;
 HWND g_childhWnd[5][5];
-HDC hdc2;
-#define WM_CHECKBINGO WM_USER + 1
-
 BOOL g_bMyTurn = TRUE;
+
+int fnCheckandSetBingo(HWND, WPARAM, LPARAM, int);
+
 enum modeBINGO {
 	bingoNONE = 0,
 	bingoMINE,
@@ -49,7 +48,6 @@ enum userInput {
 	Diagonal,
 	DiagonalE
 };
-
 
 int APIENTRY wWinMain(// main
 	_In_ HINSTANCE hInstance, //응용프로그램을 식별하는 값 
@@ -76,12 +74,6 @@ int APIENTRY wWinMain(// main
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PROJECTWINDOWS));
 
-	/*
-	C/C++ 는 함수를 직접 호출하였으며 전체 실행 흐름을 코드에 명시할수있었음
-	그러나 윈도우 프로그래밍은 입력을 예측할수없음(비동기)
-	언제 발생할지 모르는 비동기 입력에 대해 처리가 가능하면서도 화면이 멈추지말아야한다
-	따라서 윈도우 프로그래밍 모델은 Message Driven 방식을 채택
-	*/
 	MSG msg;
 
 	// 기본 메시지 루프입니다:
@@ -97,13 +89,6 @@ int APIENTRY wWinMain(// main
 	return (int)msg.wParam;
 }
 
-
-
-//
-//  함수: MyRegisterClass()
-//
-//  용도: 창 클래스를 등록합니다.
-//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
 	WNDCLASSEXW wcex;
@@ -132,17 +117,6 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 	return 0;
 }
-
-//
-//   함수: InitInstance(HINSTANCE, int)
-//
-//   용도: 인스턴스 핸들을 저장하고 주 창을 만듭니다.
-//
-//   주석:
-//
-//        이 함수를 통해 인스턴스 핸들을 전역 변수에 저장하고
-//        주 프로그램 창을 만든 다음 표시합니다.
-//
 
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
@@ -199,7 +173,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case IDM_ABOUT:
 			//DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-			InvalidateRect(hWnd, NULL, FALSE);
+			SetProp(hWnd, _T("modeBINGO"), (HANDLE)bingoNONE);
 			break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
@@ -228,10 +202,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		else
 			SetWindowText(hWnd, _T("Your Turn"));
 
-		CheckandSetBingo(hWnd, wParam, lParam, Vertical);
-		CheckandSetBingo(hWnd, wParam, lParam, Horizen);
-		CheckandSetBingo(hWnd, wParam, lParam, Diagonal);
-		CheckandSetBingo(hWnd, wParam, lParam, DiagonalE);
+		fnCheckandSetBingo(hWnd, wParam, lParam, Vertical);
+		fnCheckandSetBingo(hWnd, wParam, lParam, Horizen);
+		fnCheckandSetBingo(hWnd, wParam, lParam, Diagonal);
+		fnCheckandSetBingo(hWnd, wParam, lParam, DiagonalE);
 
 		break;
 	}
@@ -260,40 +234,40 @@ LRESULT CALLBACK ChildProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	case WM_PAINT:
 	{
 		PAINTSTRUCT ps;
-		hdc2 = BeginPaint(hWnd, &ps);
+		HDC hdc = BeginPaint(hWnd, &ps);
 		// TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...	
 
 
 		mState = (int)GetProp(hWnd, _T("modeBINGO"));
 		if (mState == bingoNONE)
 		{
-			Rectangle(hdc2, 10, 10, 80, 80);
+			Rectangle(hdc, 10, 10, 80, 80);
 		}
 		else if (mState == bingoMINE)
 		{
-			Ellipse(hdc2, 10, 10, 80, 80);
+			Ellipse(hdc, 10, 10, 80, 80);
 
 		}
 		else if (mState == bingoYOURS)
 		{
-			MoveToEx(hdc2, 10, 10, NULL);
-			LineTo(hdc2, 90, 90);
-			MoveToEx(hdc2, 90, 10, NULL);
-			LineTo(hdc2, 10, 90);
+			MoveToEx(hdc, 10, 10, NULL);
+			LineTo(hdc, 90, 90);
+			MoveToEx(hdc, 90, 10, NULL);
+			LineTo(hdc, 10, 90);
 
 		}
 		else if (mState == bingoMyBINGO)
 		{
 			HBRUSH MyBr2 = (HBRUSH)GetStockObject(DKGRAY_BRUSH);
-			SelectObject(hdc2, MyBr2);
-			Ellipse(hdc2, 10, 10, 80, 80);
+			SelectObject(hdc, MyBr2);
+			Ellipse(hdc, 10, 10, 80, 80);
 
 		}
 		else
 		{
 			HBRUSH MyBr2 = CreateSolidBrush(RGB(255, 0, 0));
-			SelectObject(hdc2, MyBr2);
-			Rectangle(hdc2, 10, 10, 80, 80);
+			SelectObject(hdc, MyBr2);
+			Rectangle(hdc, 10, 10, 80, 80);
 		}
 		EndPaint(hWnd, &ps);
 		break;
@@ -332,29 +306,29 @@ LRESULT CALLBACK ChildProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 }
 // 정보 대화 상자의 메시지 처리기입니다.
 
-int CheckandSetBingo(HWND hWnd, WPARAM wParam, LPARAM lParam, int nUserinput)
+int fnCheckandSetBingo(HWND hWnd, WPARAM wParam, LPARAM lParam, int nUserinput)
 {
 	HWND hChild = (HWND)wParam;
 	int nCurMode = (int)lParam;
 
-	int x = -1;
-	int y = -1;
-	int xtrig = 0;
+	int nx = -1;
+	int ny = -1;
+	int nTrig = 0;
 
 	//위치체크
 	for (int i = 0; i < MAX; i++) {
 		for (int j = 0; j < MAX; j++) {
 			if (g_childhWnd[i][j] == hChild)
 			{
-				x = i;
-				y = j;
+				nx = i;
+				ny = j;
 				break;
 			}
 		}
 	}
-	if (x < 0 || y < 0) return 0;
-	int temp;
-	int xParam, yParam;
+	if (nx < 0 || ny < 0) return 0;
+	int nTemp;
+	int nXParam, nYParam;
 	//가로 빙고 체크
 	for (int i = 0; i < MAX; i++)
 	{
@@ -362,40 +336,40 @@ int CheckandSetBingo(HWND hWnd, WPARAM wParam, LPARAM lParam, int nUserinput)
 		{
 		case Horizen:
 		{
-			xParam = i;
-			yParam = y;
+			nXParam = i;
+			nYParam = ny;
 			break;
 		}
 		case Vertical:
 		{
-			xParam = x;
-			yParam = i;
+			nXParam = nx;
+			nYParam = i;
 			break;
 		}
 		case Diagonal:
 		{
-			xParam = i;
-			yParam = i;
+			nXParam = i;
+			nYParam = i;
 			break;
 		}
 		case DiagonalE:
 		{
-			xParam = i;
-			yParam = MAX - i - 1;
+			nXParam = i;
+			nYParam = MAX - i - 1;
 			break;
 		}
 		default:
 			break;
 		}
 
-		temp = (int)GetProp(g_childhWnd[xParam][yParam], _T("modeBINGO"));
-		if (temp == nCurMode || temp == nCurMode + 1)
+		nTemp = (int)GetProp(g_childhWnd[nXParam][nYParam], _T("modeBINGO"));
+		if (nTemp == nCurMode || nTemp == nCurMode + 1)
 		{
-			xtrig++;
+			nTrig++;
 		}
 	}
 
-	if (xtrig == MAX)
+	if (nTrig == MAX)
 	{
 		for (int i = 0; i < MAX; i++)
 		{
@@ -403,36 +377,36 @@ int CheckandSetBingo(HWND hWnd, WPARAM wParam, LPARAM lParam, int nUserinput)
 			{
 			case Horizen:
 			{
-				xParam = i;
-				yParam = y;
+				nXParam = i;
+				nYParam = ny;
 				break;
 			}
 			case Vertical:
 			{
-				xParam = x;
-				yParam = i;
+				nXParam = nx;
+				nYParam = i;
 				break;
 			}
 			case Diagonal:
 			{
-				xParam = i;
-				yParam = i;
+				nXParam = i;
+				nYParam = i;
 				break;
 			}
 			case DiagonalE:
 			{
-				xParam = i;
-				yParam = MAX - i - 1;
+				nXParam = i;
+				nYParam = MAX - i - 1;
 				break;
 			}
 			default:
 				break;
 			}
-			SetProp(g_childhWnd[xParam][yParam], _T("modeBINGO"), (HANDLE)(nCurMode + 1));//빙고
+			SetProp(g_childhWnd[nXParam][nYParam], _T("modeBINGO"), (HANDLE)(nCurMode + 1));//빙고
 			InvalidateRect(hWnd, NULL, TRUE);
 		}
 	}
-	xtrig = 0;
+	nTrig = 0;
 	return 0;
 }
 
