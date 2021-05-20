@@ -29,7 +29,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 HWND hC1;
 HWND g_mainhWnd;
-HWND g_childhWnd[5][5];
+HWND g_childhWnd[MAX][MAX];
 BOOL g_bMyTurn = TRUE;
 
 int fnCheckandSetBingo(HWND, WPARAM, LPARAM, int);
